@@ -2,19 +2,23 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\UpdateSettingsRequest;
 use Illuminate\Http\Request;
 
 class SettingsController extends Controller
 {
-    public function edit(Request $request)
+    public function edit()
     {
-        return view('settings.edit', ['user' => $request->user()]);
+        return view('settings.edit', ['user' => auth()->user()]);
     }
 
-    public function update(UpdateSettingsRequest $request)
+    public function update(Request $request)
     {
-        $request->user()->update($request->validated());
-        return back()->with('status','Settings saved.');
+        $request->validate([
+            'theme' => 'required|in:light,dark',
+        ]);
+
+        auth()->user()->update(['theme' => $request->theme]);
+
+        return back()->with('success', 'Theme updated.');
     }
 }

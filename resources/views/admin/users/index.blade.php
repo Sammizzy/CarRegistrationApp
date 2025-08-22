@@ -1,34 +1,52 @@
-<x-app-layout>
-    <div class="flex items-center justify-between mb-4">
-        <h1 class="text-xl font-semibold">Users</h1>
-        <div class="space-x-2">
-            <a href="{{ route('admin.users.export') }}" class="bg-emerald-600 text-white px-3 py-2 rounded">Export Excel</a>
-            <a href="{{ route('admin.users.create') }}" class="bg-indigo-600 text-white px-3 py-2 rounded">New User</a>
-        </div>
-    </div>
+@extends('layouts.app')
 
-    <table class="w-full border-collapse">
-        <thead>
-        <tr class="text-left border-b">
-            <th class="py-2">Name</th>
-            <th class="py-2">Car Registration</th>
-            <th class="py-2">Email</th>
-            <th class="py-2">Actions</th>
-        </tr>
-        </thead>
-        <tbody>
-        @foreach ($users as $u)
-            <tr class="border-b">
-                <td class="py-2">{{ $u->first_name }} {{ $u->last_name }}</td>
-                <td class="py-2">{{ $u->car_registration }}</td>
-                <td class="py-2">{{ $u->email }}</td>
-                <td class="py-2">
-                    <a href="{{ route('admin.users.edit', $u) }}" class="underline">Edit</a>
-                </td>
+@section('content')
+    <div class="container">
+        <h1>Manage Users</h1>
+
+        {{-- Search bar --}}
+        <form method="GET" action="{{ route('admin.users.index') }}" class="mb-3">
+            <div class="input-group">
+                <input
+                    type="text"
+                    name="search"
+                    class="form-control"
+                    placeholder="Search by name, email, or registration..."
+                    value="{{ request('search') }}">
+                <button class="btn btn-outline-secondary" type="submit">Search</button>
+            </div>
+        </form>
+
+        {{-- Users table --}}
+        <table class="table table-bordered">
+            <thead>
+            <tr>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Car Registration</th>
+                <th>Theme</th>
+                <th>Actions</th>
             </tr>
-        @endforeach
-        </tbody>
-    </table>
+            </thead>
+            <tbody>
+            @forelse ($users as $user)
+                <tr>
+                    <td>{{ $user->first_name }} {{ $user->last_name }}</td>
+                    <td>{{ $user->email }}</td>
+                    <td>{{ $user->car_registration }}</td>
+                    <td>{{ ucfirst($user->theme) }}</td>
+                    <td>
+                        <a href="{{ route('admin.users.edit', $user) }}" class="btn btn-sm btn-primary">Edit</a>
+                    </td>
+                </tr>
+            @empty
+                <tr>
+                    <td colspan="5">No users found.</td>
+                </tr>
+            @endforelse
+            </tbody>
+        </table>
 
-    <div class="mt-4">{{ $users->links() }}</div>
-</x-app-layout>
+        {{ $users->withQueryString()->links() }}
+    </div>
+@endsection

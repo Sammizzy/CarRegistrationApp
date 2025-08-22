@@ -1,37 +1,39 @@
 <x-app-layout>
     <h1 class="text-xl font-semibold mb-4">Your Profile</h1>
 
-    @if (session('status'))
-        <div class="mb-4 text-green-600">{{ session('status') }}</div>
+    @if (session('success'))
+        <div class="mb-4 text-green-600">{{ session('success') }}</div>
     @endif
 
     @auth
-        <a href="{{ route('profile.edit') }}">Profile</a>
-        <a href="{{ route('settings.edit') }}">Settings</a>
+        <div class="mb-4 space-x-2">
+            <a href="{{ route('profile.edit') }}" class="text-blue-600">Profile</a>
+            <a href="{{ route('settings.edit') }}" class="text-blue-600">Settings</a>
 
-        @if(auth()->user()->is_admin)
-            <a href="{{ route('admin.users.index') }}">Admin</a>
-        @endif
+            @if(auth()->user()->is_admin)
+                <a href="{{ route('admin.settings') }}" class="text-blue-600">Admin</a>
+            @endif
+        </div>
     @endauth
 
     <form method="POST" action="{{ route('profile.update') }}" class="space-y-4">
         @csrf
-        @method('PATCH')
+        @method('PUT')
 
         <div>
-            <label class="block text-sm">First name</label>
+            <label class="block text-sm">First Name</label>
             <input name="first_name" value="{{ old('first_name', $user->first_name) }}" class="border p-2 w-full">
             @error('first_name') <p class="text-red-600 text-sm">{{ $message }}</p> @enderror
         </div>
 
         <div>
-            <label class="block text-sm">Last name</label>
+            <label class="block text-sm">Last Name</label>
             <input name="last_name" value="{{ old('last_name', $user->last_name) }}" class="border p-2 w-full">
             @error('last_name') <p class="text-red-600 text-sm">{{ $message }}</p> @enderror
         </div>
 
         <div>
-            <label class="block text-sm">Car registration</label>
+            <label class="block text-sm">Car Registration</label>
             <input name="car_registration" value="{{ old('car_registration', $user->car_registration) }}" class="border p-2 w-full">
             @error('car_registration') <p class="text-red-600 text-sm">{{ $message }}</p> @enderror
         </div>

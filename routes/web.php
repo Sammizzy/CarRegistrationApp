@@ -1,27 +1,63 @@
 <?php
 
+use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\SettingsController;
 use App\Http\Controllers\Admin\UserController as AdminUserController;
-use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Admin\AdminSettingsController;
+use App\Http\Middleware\IsAdmin;
 
-Route::redirect('/', '/login');
-
-Route::middleware(['auth'])->group(function () {
-    // Profile (self)
-    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
-    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
-
-    // Settings (self)
-    Route::get('/settings', [SettingsController::class, 'edit'])->name('settings.edit');
-    Route::patch('/settings', [SettingsController::class, 'update'])->name('settings.update');
-
-    // Admin area (policy will enforce admin-only via authorizeResource + Gate::before)
-    Route::prefix('admin')->name('admin.')->group(function () {
-        Route::resource('users', AdminUserController::class);
-        Route::get('users-export', [AdminUserController::class, 'export'])->name('users.export');
-    });
+// Redirect root to login
+Route::get('/', function () {
+    return redirect()->route('login');
 });
 
-require __DIR__.'/auth.php';
 
+// Auth Routes
+// Show login form
+Route::get('/login', [AuthenticatedSessionController::class, 'create'])
+    ->middleware('guest')
+    ->name('login');
+
+// Handle login submission
+Route::post('/login', [AuthenticatedSessionController::class, 'store'])
+    ->middleware('guest');
+
+// Logout
+Route::post('/logout', [AuthenticatedSessionController::class, 'destroy'])
+    ->middleware('IsAdmin')
+    ->name('logout');
+
+
+// Normal User Routes
+
+Route::middleware([IsAdmin::class,'verified'])->group(function () {
+    // Profile
+    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
+    Route::put('/profile', [ProfileController::class, 'update'])->name('profile.update');
+
+    route::get('/profile', function (){
+
+    });
+
+    // Settings (dark/light mode)
+    Route::get('/settings', [SettingsController::class, 'edit'])->name('settings.edit');
+    Route::put('/settings', [SettingsController::class, 'update'])->name('settings.update');
+});
+
+
+// Admin Routes
+
+Route::middleware([IsAdmin::class])->prefix('admin')->name('admin.')->group(function () {
+    // Admin dashboard / settings
+    Route::get('/settings', [AdminSettingsController::class, 'index'])->name('settings');
+
+    // Manage users
+    Route::get('/users', [AdminUserController::class, 'index'])->name('users.index');
+    Route::get('/users/{user}/edit', [AdminUserController::class, 'edit'])->name('users.edit');
+    Route::put('/users/{user}', [AdminUserController::class, 'update'])->name('users.update');
+});
+
+// Include default Laravel auth routes if needed
+require __DIR__.'/auth.php';

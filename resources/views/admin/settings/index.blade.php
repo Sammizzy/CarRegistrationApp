@@ -12,6 +12,6 @@
             </div>
         </div>
 
-        <a href="{{ route('admin.users') }}" class="btn btn-primary">Manage Users</a>
+        <a href="{{ route('admin.users.index') }}" class="btn btn-primary">Manage Users</a>
     </div>
 @endsection

@@ -3,28 +3,38 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use App\Http\Requests\UpdateProfileRequest;
+use Illuminate\Support\Facades\Auth;
 
 class ProfileController extends Controller
 {
-    public function edit(Request $request)
+    /**
+     * Show the user's profile edit form.
+     */
+    public function edit()
     {
-        $this->authorize('update', $request->user());
-        return view('profile.edit', ['user' => $request->user()]);
+        $user = Auth::user();
+
+        return view('profile.edit', compact('user'));
     }
 
-    public function update(UpdateProfileRequest $request)
+    /**
+     * Update the user's profile.
+     */
+    public function update(Request $request)
     {
-        $user = $request->user();
-        $this->authorize('update', $user);
+        $user = Auth::user();
 
-        $data = $request->validated();
-        if (empty($data['password'])) {
-            unset($data['password']);
-        }
+        $validated = $request->validate([
+            'first_name'       => 'required|string|max:255',
+            'last_name'        => 'required|string|max:255',
+            'car_registration' => 'required|string|max:20|unique:users,car_registration,' . $user->id,
+        ]);
 
-        $user->update($data);
+        $user->update($validated);
 
-        return redirect()->route('profile.edit')->with('status', 'Profile updated.');
+        return redirect()
+            ->route('user.profile')
+            ->with('success', 'Profile updated successfully.');
     }
 }
+

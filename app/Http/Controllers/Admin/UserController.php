@@ -3,76 +3,56 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Exports\UsersExport;
-use Maatwebsite\Excel\Facades\Excel;
 use App\Models\User;
-use App\Http\Requests\StoreUserRequest;
-use App\Http\Requests\UpdateUserRequest;
-use Illuminate\Support\Facades\Hash;
+use Illuminate\Http\Request;
 
 class UserController extends Controller
 {
-    public function __construct()
+    /**
+     * Show a list of all users (with search).
+     */
+    public function index(Request $request)
     {
-        $this->authorizeResource(User::class, 'user');
+        $search = $request->input('search');
+
+        $users = User::query()
+            ->when($search, function ($query, $search) {
+                $query->where('first_name', 'like', "%{$search}%")
+                    ->orWhere('last_name', 'like', "%{$search}%")
+                    ->orWhere('car_registration', 'like', "%{$search}%")
+                    ->orWhere('email', 'like', "%{$search}%");
+            })
+            ->paginate(10)
+            ->withQueryString(); // Keeps search term in pagination links
+
+        return view('admin.users.index', compact('users', 'search'));
     }
 
-    public function index()
-    {
-        $users = User::orderBy('last_name')->orderBy('first_name')->paginate(15);
-        return view('admin.users.index', compact('users'));
-    }
-
-    public function create()
-    {
-        return view('admin.users.create');
-    }
-
-    public function store(StoreUserRequest $request)
-    {
-        $data = $request->validated();
-        $data['password'] = Hash::make($data['password']);
-        User::create($data);
-
-        return redirect()->route('admin.users.index')->with('status','User created.');
-    }
-
-    public function show(User $user)
-    {
-        return view('admin.users.show', compact('user'));
-    }
-
+    /**
+     * Show edit form for a specific user.
+     */
     public function edit(User $user)
     {
         return view('admin.users.edit', compact('user'));
     }
 
-    public function update(UpdateUserRequest $request, User $user)
+    /**
+     * Update a specific user.
+     */
+    public function update(Request $request, User $user)
     {
-        $data = $request->validated();
+        $validated = $request->validate([
+            'first_name'       => 'required|string|max:255',
+            'last_name'        => 'required|string|max:255',
+            'car_registration' => 'required|string|max:20|unique:users,car_registration,' . $user->id,
+            'email'            => 'required|email|unique:users,email,' . $user->id,
+        ]);
 
-        if (!empty($data['password'])) {
-            $data['password'] = Hash::make($data['password']);
-        } else {
-            unset($data['password']);
-        }
+        $user->update($validated);
 
-        $user->update($data);
-
-        return redirect()->route('admin.users.index')->with('status','User updated.');
-    }
-
-    public function destroy(User $user)
-    {
-        $this->authorize('delete', $user);
-        $user->delete();
-
-        return redirect()->route('admin.users.index')->with('status','User deleted.');
-    }
-
-    public function export()
-    {
-        $this->authorize('viewAny', \App\Models\User::class);
-        return Excel::download(new UsersExport, 'users.xlsx');
+        // ✅ Corrected route name
+        return redirect()
+            ->route('admin.users.index')
+            ->with('success', 'User updated successfully.');
     }
 }
