@@ -37,6 +37,7 @@ Route::middleware([IsAdmin::class,'verified'])->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::put('/profile', [ProfileController::class, 'update'])->name('profile.update');
 
+
     route::get('/profile', function (){
 
     });
@@ -57,6 +58,7 @@ Route::middleware([IsAdmin::class])->prefix('admin')->name('admin.')->group(func
     Route::get('/users', [AdminUserController::class, 'index'])->name('users.index');
     Route::get('/users/{user}/edit', [AdminUserController::class, 'edit'])->name('users.edit');
     Route::put('/users/{user}', [AdminUserController::class, 'update'])->name('users.update');
+    Route::delete('/users/{user}', [AdminUserController::class, 'destroy'])->name('users.destroy'); // 👈 add this
 });
 
 // Include default Laravel auth routes if needed

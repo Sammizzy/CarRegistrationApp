@@ -36,5 +36,17 @@ class ProfileController extends Controller
             ->route('user.profile')
             ->with('success', 'Profile updated successfully.');
     }
+    public function destroy(Request $request)
+    {
+        Auth::guard('web')->logout();
+
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
+
+        return redirect()->route('login');
+    }
+
+
+
 }
 

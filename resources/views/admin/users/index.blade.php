@@ -37,6 +37,12 @@
                     <td>{{ ucfirst($user->theme) }}</td>
                     <td>
                         <a href="{{ route('admin.users.edit', $user) }}" class="btn btn-sm btn-primary">Edit</a>
+                    <td>
+                        <form action="{{ route('admin.users.destroy', $user) }}" method="POST" style="display:inline;">
+                            @csrf
+                            @method('DELETE')
+                            <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Are you sure?')">Delete</button>
+                        </form>
                     </td>
                 </tr>
             @empty
