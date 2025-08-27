@@ -50,7 +50,7 @@ class UserController extends Controller
 
         $user->update($validated);
 
-        // ✅ Corrected route name
+
         return redirect()
             ->route('admin.users.index')
             ->with('success', 'User updated successfully.');

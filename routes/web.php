@@ -30,26 +30,26 @@ Route::post('/logout', [AuthenticatedSessionController::class, 'destroy'])
     ->name('logout');
 
 
-// Normal User Routes
+use App\Http\Controllers\Auth\RegisteredUserController;
 
-Route::middleware([IsAdmin::class,'verified'])->group(function () {
-    // Profile
+// Registration
+Route::get('/register', [RegisteredUserController::class, 'create'])
+    ->middleware('guest')
+    ->name('register');
+
+Route::post('/register', [RegisteredUserController::class, 'store'])
+    ->middleware('guest');
+
+
+// Normal User Routes
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::put('/profile', [ProfileController::class, 'update'])->name('profile.update');
-
-
-    route::get('/profile', function (){
-
-    });
 
     // Settings (dark/light mode)
     Route::get('/settings', [SettingsController::class, 'edit'])->name('settings.edit');
     Route::put('/settings', [SettingsController::class, 'update'])->name('settings.update');
-});
-
 
 // Admin Routes
-
 Route::middleware([IsAdmin::class])->prefix('admin')->name('admin.')->group(function () {
     // Admin dashboard / settings
     Route::get('/settings', [AdminSettingsController::class, 'index'])->name('settings');
@@ -58,7 +58,7 @@ Route::middleware([IsAdmin::class])->prefix('admin')->name('admin.')->group(func
     Route::get('/users', [AdminUserController::class, 'index'])->name('users.index');
     Route::get('/users/{user}/edit', [AdminUserController::class, 'edit'])->name('users.edit');
     Route::put('/users/{user}', [AdminUserController::class, 'update'])->name('users.update');
-    Route::delete('/users/{user}', [AdminUserController::class, 'destroy'])->name('users.destroy'); // 👈 add this
+    Route::delete('/users/{user}', [AdminUserController::class, 'destroy'])->name('users.destroy');
 });
 
 // Include default Laravel auth routes if needed

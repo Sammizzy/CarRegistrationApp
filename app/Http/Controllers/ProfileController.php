@@ -33,7 +33,7 @@ class ProfileController extends Controller
         $user->update($validated);
 
         return redirect()
-            ->route('user.profile')
+            ->route('profile.edit')
             ->with('success', 'Profile updated successfully.');
     }
     public function destroy(Request $request)

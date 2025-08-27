@@ -29,7 +29,7 @@ class AuthenticatedSessionController extends Controller
                 return redirect()->route('admin.settings');
             }
 
-            return redirect()->route('admin.profile.edit');
+            return redirect()->route('profile.edit');
         }
 
         return back()->withErrors([
