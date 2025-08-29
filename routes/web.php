@@ -13,7 +13,6 @@ Route::get('/', function () {
     return redirect()->route('login');
 });
 
-
 // Auth Routes
 // Show login form
 Route::get('/login', [AuthenticatedSessionController::class, 'create'])
@@ -59,6 +58,11 @@ Route::middleware([IsAdmin::class])->prefix('admin')->name('admin.')->group(func
     Route::get('/users/{user}/edit', [AdminUserController::class, 'edit'])->name('users.edit');
     Route::put('/users/{user}', [AdminUserController::class, 'update'])->name('users.update');
     Route::delete('/users/{user}', [AdminUserController::class, 'destroy'])->name('users.destroy');
+
+    // Export users
+    Route::post('/users/export', [AdminUserController::class, 'export'])->name('users.export');
+    Route::get('/admin/users/export-all', [AdminUserController::class, 'exportAll'])->name('admin.users.exportAll');
+
 });
 
 // Include default Laravel auth routes if needed

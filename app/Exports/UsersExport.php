@@ -5,25 +5,33 @@ namespace App\Exports;
 use App\Models\User;
 use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\WithHeadings;
-use Maatwebsite\Excel\Concerns\WithMapping;
 
-class UsersExport implements FromCollection, WithHeadings, WithMapping
+class UsersExport implements FromCollection, WithHeadings
 {
-    public function collection()
+    protected $userIds;
+
+    public function __construct(array $userIds = [])
     {
-        return User::orderBy('last_name')->orderBy('first_name')->get(['first_name','last_name','car_registration']);
+        $this->userIds = $userIds;
     }
 
-    public function map($user): array
+    public function collection()
     {
-        return [
-            $user->first_name . ' ' . $user->last_name,
-            $user->car_registration,
-        ];
+        $query = User::query()->select('first_name', 'last_name', 'car_registration');
+
+        if (!empty($this->userIds)) {
+            $query->whereIn('id', $this->userIds);
+        }
+
+        return $query->get();
     }
 
     public function headings(): array
     {
-        return ['Name', 'Car Registration'];
+        return [
+            'First Name',
+            'Last Name',
+            'Car Registration',
+        ];
     }
 }
