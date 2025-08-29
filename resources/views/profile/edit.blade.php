@@ -24,6 +24,7 @@
             </div>
 
             <button type="submit" class="btn btn-primary">Update</button>
+            {{ __('Your information has been updated.') }}
 
         </form>
     </div>
